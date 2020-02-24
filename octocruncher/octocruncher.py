@@ -77,13 +77,16 @@ class SpecValue:
         return '{}: {}'.format(self.name, self.value)
 
 class OctoCruncher:
-    def __init__(self, mpn=None,
-                file_source=None,
-                ):
+    def __init__(self,
+                 mpn=None,
+                 file_source=None,
+                 json_source=None
+                 ):
 
         self.mpn = mpn
         self.file_source=file_source
-        self.octoresp = None
+        self.octoresp = json_source if json_source is not None else None
+        self.using_json = 1 if json_source is not None else 0
         self.itemnumber = 0
         self.api_key = os.environ.get('OCTOPART_API_KEY')
 
@@ -161,9 +164,11 @@ class OctoCruncher:
 
             return
 
+        if self.using_json: return
+
         print(self.mpn)
-        print(self.api_key)
         # Build url for query
+        # todo: quote URL
         url = 'http://octopart.com/api/v3/parts/match?'
         url += '&queries=[{"mpn":"' + self.mpn + '"}]'
         url += '&apikey=' + self.api_key
