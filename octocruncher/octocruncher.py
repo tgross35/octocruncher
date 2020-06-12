@@ -23,53 +23,87 @@ class OctoCruncher:
         self.itemnumber = itemnumber
 
     def getNumItems(self):
-        return len(self.octoresp['results'][0].get('items'))
+        try:
+            return len(self.octoresp['results'][0].get('items'))
+
+        except:
+            return 0
 
     def getMPN(self):
-        return self.octoresp['results'][0]['items'][self.itemnumber].get('mpn')
+        try:
+            return self.octoresp['results'][0]['items'][self.itemnumber].get('mpn')
+
+        except:
+            return ''
 
     def getManufacturer(self):
-        return Manufacturer(self.octoresp['results'][0]['items'][self.itemnumber]\
+        try:
+            return Manufacturer(self.octoresp['results'][0]['items'][self.itemnumber]\
             .get('manufacturer'))
+        except:
+            return Manufacturer(None)
 
     def getNumOffers(self):
-        return len(self.octoresp['results'][0]['items'][self.itemnumber]['offers'])
+        try:
+            return len(self.octoresp['results'][0]['items'][self.itemnumber]['offers'])
+
+        except:
+            return 0
 
     def getOffer(self, sellernumber=0):
-        return PartOffer(self.octoresp['results'][0]['items'][self.itemnumber]\
-            ['offers'][sellernumber])
+        try:
+            return PartOffer(listget(self.octoresp['results'][0]['items'][self.itemnumber]\
+                ['offers'], sellernumber))
+        except:
+            return PartOffer(None)
 
     # Get the number of datasheets
     def getNumDatasheets(self):
-        return len(self.octoresp['results'][0]['items'][self.itemnumber]\
-        .get('datasheets'))
+        try:
+            return len(self.octoresp['results'][0]['items'][self.itemnumber]\
+                .get('datasheets'))
+        except:
+            return 0
 
     # Returns a Datasheet object
     def getDatasheet(self, datasheetnumber=0):
-        print('test')
-        return Datasheet(self.octoresp['results'][0]['items'][self.itemnumber]\
-            ['datasheets'][datasheetnumber])
+        try:
+            return Datasheet(listget(self.octoresp['results'][0]['items'][self.itemnumber]\
+                ['datasheets'], datasheetnumber))
+        except:
+            return Datasheet(None)
 
     # Get the number of descriptions
     def getNumDescriptions(self):
-        return len(self.octoresp['results'][0]['items'][self.itemnumber]\
+        try:
+            return len(self.octoresp['results'][0]['items'][self.itemnumber]\
             ['descriptions'])
+        except:
+            return 0
 
     # Returns a datasheet object
     def getDescription(self, descriptionnumber=0):
-        return Description(self.octoresp['results'][0]['items'][self.itemnumber]\
-            ['descriptions'][descriptionnumber])
+        try:
+            return Description(listeget(self.octoresp['results'][0]['items'][self.itemnumber]\
+            ['descriptions'], descriptionnumber))
+        except:
+            print('Getting desc')
+            return Description()
 
     # This gets a parameter from the 'specs' dict of a response item
     def getSpec(self, specname):
-        return SpecValue(self.octoresp['results'][0]['items'][self.itemnumber]\
+        try:
+            return SpecValue(self.octoresp['results'][0]['items'][self.itemnumber]\
             ['specs'].get(specname))
-
+        except:
+            return SpecValue(None)
 
     # This does about the same thing as GetSpe cbut doesn't need an exact match
     def getSpecFuzzy(self, specname):
-        return self.getSpecFuzzyCloseness(specname)[0]
-
+        try:
+            return self.getSpecFuzzyCloseness(specname)[0]
+        except:
+            return SpecValue(None)
 
     # This does about the same thing as getSpec but doesn't need an exact match
     # Returns a tuple with the spec and its closeness rating
@@ -77,19 +111,22 @@ class OctoCruncher:
         # a dict that holds {spec_name, closeness_rating} e.g. {'resistance_tolerance', 9}
         howclose = {}
 
-        for i in self.octoresp['results'][0]['items'][self.itemnumber]['specs']:
-            if specname is None or i is None: continue
-            howclose[i] = SequenceMatcher(None, specname, i).ratio()
+        try:
+            for i in self.octoresp['results'][0]['items'][self.itemnumber]['specs']:
+                if specname is None or i is None: continue
+                howclose[i] = SequenceMatcher(None, specname, i).ratio()
 
-        max = 0
-        max_key = ''
+            max = 0
+            max_key = ''
 
-        for i in howclose:
-            if howclose[i] >= max:
-                max = howclose[i]
-                max_key = i
+            for i in howclose:
+                if howclose[i] >= max:
+                    max = howclose[i]
+                    max_key = i
 
-        return (self.getSpec(max_key), max)
+            return (self.getSpec(max_key), max)
+        except IndexError:
+            return(SpecValue(None), 0)
 
     # This does a json dump that can later be loaded by
     def getJSON(self):
@@ -125,6 +162,16 @@ class OctoCruncher:
         # if data is None:
         #     print("Querying API for {}".format(mpn))
         self.octoresp = json.loads(urllib.request.urlopen(url).read())
-        self.item = self.octoresp['results'][0]['items'][0]
+
+        # Try to set item from response. If it doesn't exist, catch the exception
+        self.item =  listget(self.octoresp['results'][0]['items'], 0)
 
         return
+
+# Safew way to get from a list that may or may not exist
+def listget(l, i, default=None):
+    if l is None: return None
+    try:
+        return l[i]
+    except IndexError:
+        return default
