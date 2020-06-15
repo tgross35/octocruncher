@@ -57,11 +57,11 @@ class Manufacturer:
 
 
 class Seller:
+    name = ''
     display_flag = ''
     has_ecommerce = ''
     homepage_url = ''
     id = ''
-    name = ''
     uid = ''
 
     def __init__(self, sellerobj=None):
