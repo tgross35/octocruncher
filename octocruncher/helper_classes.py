@@ -36,10 +36,7 @@ class Description:
     source = ''
 
     def __init__(self, descriptionobj=None):
-        if descriptionobj is None:
-            print(self.value)
-            print('val')
-            return
+        if descriptionobj is None: return
         self.value = descriptionobj.get('value', '')
         self.source = descriptionobj['attribution']['sources'][0].get('name', '')
 

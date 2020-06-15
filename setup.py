@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="octocruncher", # Replace with your own username
-    version="0.0.12",
+    version="0.1.0",
     author="Trevor Gross",
     author_email="tgross@intrepidcs.com",
     description="A simple package to implement the Octopart API",
