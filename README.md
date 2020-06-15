@@ -12,7 +12,7 @@ os.environ['OCTOPART_API_KEY'] = 'xxxxxxxxx'
 
 ## Usage
 ```python
-from octocruncher.octocruncher import OctoCruncher
+from octocruncher import OctoCruncher
 
 # Setup the manufacturer part number here
 x = OctoCruncher(mpn='mpn')
@@ -27,6 +27,16 @@ This is helpful for when you want to cache (use with OctoCruncher.getJSON())
 file_source: Similar to json_source but will load from the given file path
 
 ## Callables
+
+### .getNumItems():
+This tells you how many results there are
+
+### .setItemNumber(itemnumber=0)
+This sets the working item for all other functions
+
+### .getMPN():
+Returns working manufacturer part number
+
 ### .getJSON():
 This will return a json object that can be cached and loaded later
 

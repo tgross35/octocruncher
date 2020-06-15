@@ -1,6 +1,7 @@
 import json, urllib.request, os
 from difflib import SequenceMatcher
-from .classes import Datasheet, Description, Manufacturer, PartOffer, SpecValue
+from .helper_classes import Datasheet, Description, Manufacturer, PartOffer, SpecValue
+from typing import Tuple, List, Any
 
 class OctoCruncher:
     def __init__(self,
@@ -19,95 +20,94 @@ class OctoCruncher:
         self.__queryOctopart()
 
     # This does nothing now but will select which responded item you want
-    def setItemNumber(self, itemnumber=0):
+    def setItemNumber(self, itemnumber=0) -> None:
         self.itemnumber = itemnumber
 
-    def getNumItems(self):
+    def getNumItems(self) -> int:
         try:
             return len(self.octoresp['results'][0].get('items'))
 
-        except:
+        except IndexError:
             return 0
 
-    def getMPN(self):
+    def getMPN(self) -> str:
         try:
             return self.octoresp['results'][0]['items'][self.itemnumber].get('mpn')
 
-        except:
+        except IndexError:
             return ''
 
-    def getManufacturer(self):
+    def getManufacturer(self) -> Manufacturer:
         try:
             return Manufacturer(self.octoresp['results'][0]['items'][self.itemnumber]\
             .get('manufacturer'))
-        except:
+        except IndexError:
             return Manufacturer(None)
 
-    def getNumOffers(self):
+    def getNumOffers(self) -> int:
         try:
             return len(self.octoresp['results'][0]['items'][self.itemnumber]['offers'])
 
-        except:
+        except IndexError:
             return 0
 
-    def getOffer(self, sellernumber=0):
+    def getOffer(self, sellernumber=0) -> PartOffer:
         try:
             return PartOffer(listget(self.octoresp['results'][0]['items'][self.itemnumber]\
                 ['offers'], sellernumber))
-        except:
+        except IndexError:
             return PartOffer(None)
 
     # Get the number of datasheets
-    def getNumDatasheets(self):
+    def getNumDatasheets(self) -> int:
         try:
             return len(self.octoresp['results'][0]['items'][self.itemnumber]\
                 .get('datasheets'))
-        except:
+        except IndexError:
             return 0
 
     # Returns a Datasheet object
-    def getDatasheet(self, datasheetnumber=0):
+    def getDatasheet(self, datasheetnumber=0) -> Datasheet:
         try:
             return Datasheet(listget(self.octoresp['results'][0]['items'][self.itemnumber]\
                 ['datasheets'], datasheetnumber))
-        except:
+        except IndexError:
             return Datasheet(None)
 
     # Get the number of descriptions
-    def getNumDescriptions(self):
+    def getNumDescriptions(self) -> int:
         try:
             return len(self.octoresp['results'][0]['items'][self.itemnumber]\
             ['descriptions'])
-        except:
+        except IndexError:
             return 0
 
     # Returns a datasheet object
-    def getDescription(self, descriptionnumber=0):
+    def getDescription(self, descriptionnumber=0) -> Description:
         try:
-            return Description(listeget(self.octoresp['results'][0]['items'][self.itemnumber]\
+            return Description(listget(self.octoresp['results'][0]['items'][self.itemnumber]\
             ['descriptions'], descriptionnumber))
-        except:
-            print('Getting desc')
+        except IndexError:
             return Description()
 
     # This gets a parameter from the 'specs' dict of a response item
-    def getSpec(self, specname):
+    def getSpec(self, specname: str) -> SpecValue:
         try:
             return SpecValue(self.octoresp['results'][0]['items'][self.itemnumber]\
-            ['specs'].get(specname))
-        except:
+            ['specs'].get(specname), specname)
+        except IndexError:
             return SpecValue(None)
 
-    # This does about the same thing as GetSpe cbut doesn't need an exact match
-    def getSpecFuzzy(self, specname):
+    # This does about the same thing as GetSpec but doesn't need an exact match
+    def getSpecFuzzy(self, specname: str) -> SpecValue:
         try:
             return self.getSpecFuzzyCloseness(specname)[0]
-        except:
+        except IndexError:
             return SpecValue(None)
 
     # This does about the same thing as getSpec but doesn't need an exact match
     # Returns a tuple with the spec and its closeness rating
-    def getSpecFuzzyCloseness(self, specname):
+    def getSpecFuzzyCloseness(self, specname: str) -> Tuple[SpecValue, int]:
         # a dict that holds {spec_name, closeness_rating} e.g. {'resistance_tolerance', 9}
         howclose = {}
 
@@ -128,13 +128,30 @@ class OctoCruncher:
         except IndexError:
             return(SpecValue(None), 0)
 
+    # Returns a list of specs
+    def getAllSpecs(self) -> List[SpecValue]:
+        try:
+            l = []
+            for i in self.octoresp['results'][0]['items'][self.itemnumber]['specs']:
+                l.append(SpecValue(self.octoresp['results'][0]['items'][self.itemnumber]['specs'].get(i), i))
+            return l
+        except IndexError:
+            return []
+
+    # Return dict with all specs
+    def getSpecsJSON(self) -> Any:
+        try:
+            return self.octoresp['results'][0]['items'][self.itemnumber]['specs']
+        except IndexError:
+            return {}
+
     # This does a json dump that can later be loaded by
-    def getJSON(self):
+    def getJSON(self) -> Any:
         return self.octoresp
     #Helper functions
 
     # Actually ask octopart for a response, or use the config file
-    def __queryOctopart(self):
+    def __queryOctopart(self) -> None:
         if self.file_source is not None:
             with open(self.file_source) as f:
                 self.octoresp = json.load(f)
@@ -145,7 +162,6 @@ class OctoCruncher:
 
         if self.using_json: return
 
-        print(self.mpn)
         # Build url for query
         # todo: quote URL
         url = 'http://octopart.com/api/v3/parts/match?'
@@ -153,7 +169,6 @@ class OctoCruncher:
         url += '&apikey=' + self.api_key
         url += '&include[]=datasheets&include[]=descriptions&include[]=specs'
 
-        print(url)
         #
         # # Try to get the return from the cache
         # data = cache.get(cachekey)
@@ -169,7 +184,7 @@ class OctoCruncher:
         return
 
 # Safew way to get from a list that may or may not exist
-def listget(l, i, default=None):
+def listget(l, i, default=None) -> Any:
     if l is None: return None
     try:
         return l[i]

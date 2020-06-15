@@ -27,7 +27,7 @@ class Datasheet:
         if datasheetobj['attribution']['sources'] is not None:
             self.source = datasheetobj['attribution']['sources'][0].get('name', '')
 
-    def __str__(self):
+    def __repr__(self):
         return self.source
 
 # This is the type of description object found in octopart json
@@ -35,16 +35,15 @@ class Description:
     value = ''
     source = ''
 
-    def __init__(self, descriptionobj):
+    def __init__(self, descriptionobj=None):
         if descriptionobj is None:
             print(self.value)
             print('val')
             return
-        print('deohjfojeoij')
         self.value = descriptionobj.get('value', '')
         self.source = descriptionobj['attribution']['sources'][0].get('name', '')
 
-    def __respr__(self):
+    def __repr__(self):
         return self.value
 
 class Manufacturer:
@@ -57,7 +56,28 @@ class Manufacturer:
         self.homepage_url = manufacturerobj.get('homepage_url', '')
 
     def __repr__(self):
-        return '{}'.format(self.name)
+        return self.name
+
+
+class Seller:
+    display_flag = ''
+    has_ecommerce = ''
+    homepage_url = ''
+    id = ''
+    name = ''
+    uid = ''
+
+    def __init__(self, sellerobj=None):
+        if sellerobj is None: return
+        self.display_flag = sellerobj.get('display_flag', '')
+        self.has_ecommerce = sellerobj.get('has_ecommerce', '')
+        self.homepage_url = sellerobj.get('homepage_url', '')
+        self.id = sellerobj.get('id', '')
+        self.name = sellerobj.get('name', '')
+        self.uid = sellerobj.get('uid', '')
+
+    def __repr__(self):
+        return '{}: {}'.format(self.name, self.id)
 
 class PartOffer:
     eligible_region = ''
@@ -77,7 +97,7 @@ class PartOffer:
     product_url = ''
     seller = ''
     sku = ''
-    seller = ''
+    seller = Seller()
 
     def __init__(self, offerobj):
         if offerobj is None: return
@@ -103,38 +123,24 @@ class PartOffer:
     def __repr__(self):
         return '{}: {}'.format(self.seller.name, self.sku)
 
-class Seller:
-    display_flag = ''
-    has_ecommerce = ''
-    homepage_url = ''
-    id = ''
-    name = ''
-    uid = ''
-
-    def __init__(self, sellerobj):
-        if sellerobj is None: return
-        self.display_flag = sellerobj.get('display_flag', '')
-        self.has_ecommerce = sellerobj.get('has_ecommerce', '')
-        self.homepage_url = sellerobj.get('homepage_url', '')
-        self.id = sellerobj.get('id', '')
-        self.name = sellerobj.get('name', '')
-        self.uid = sellerobj.get('uid', '')
-
-    def __repr__(self):
-        return '{}: {}'.format(self.name, self.id)
 
 class SpecValue:
+    name = ''
     display_value = ''
     value = ''
     max_value = ''
     min_value = ''
 
-    def __init__(self, specobj):
+    def __init__(self, specobj, name=''):
         if specobj is None: return
+        self.name = name
         self.display_value = specobj.get('display_value')
         if specobj.get('value'): self.value = specobj.get('value')[0]
         self.max_value = specobj.get('max_value')
         self.min_value = specobj.get('min_value')
 
     def __repr__(self):
-        return '{}: {}'.format(self.display_value, self.value)
+        return '{}: {}'.format(self.name, self.display_value)
+
+    def __str__(self):
+        return '{}: {}'.format(self.name, self.display_value)

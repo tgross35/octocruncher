@@ -1,3 +1,3 @@
 # Octocruncher
 
-# from octocruncher import OctoCruncher
+from octocruncher.octocruncher import OctoCruncher
