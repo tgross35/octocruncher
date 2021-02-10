@@ -1,6 +1,6 @@
 # Octocruncher V3
 
-Use this to query Octopart
+Use this to query Octopart using the v3 API
 
 To function with active requests, the OCTOPART_API_KEY environment variable must
 be set. This can be done in your Python using the following:
