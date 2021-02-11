@@ -3,6 +3,7 @@ include/
 lib/
 __pycache*
 .Python
+.env/
 
 *.pyc
 *.pyo
@@ -22,3 +23,4 @@ MANIFEST
 
 .coverage
 .python-version
+.vscode/
