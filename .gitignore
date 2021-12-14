@@ -4,6 +4,7 @@ lib/
 __pycache*
 .Python
 .env/
+.venv/
 
 *.pyc
 *.pyo
