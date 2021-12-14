@@ -1,4 +1,4 @@
-# classes.py
+# helper_classes.py
 # Data types found in an Octopart response
 
 # This is the type of datasheet found in the json file
@@ -8,13 +8,13 @@ class Datasheet:
     last_updated = ''
     num_pages = ''
     size_bytes = ''
-    date_created = ''
     mimetype = ''
     url = ''
     source = ''
 
     def __init__(self, datasheetobj=None):
-        if datasheetobj is None: return
+        if datasheetobj is None:
+            return
         if datasheetobj['metadata'] is not None:
             self.date_created = datasheetobj['metadata'].get('date_created', '')
             self.last_updated = datasheetobj['metadata'].get('last_updated', '')
@@ -30,25 +30,29 @@ class Datasheet:
     def __repr__(self):
         return self.source
 
+
 # This is the type of description object found in octopart json
 class Description:
     value = ''
     source = ''
 
     def __init__(self, descriptionobj=None):
-        if descriptionobj is None: return
+        if descriptionobj is None:
+            return
         self.value = descriptionobj.get('value', '')
         self.source = descriptionobj['attribution']['sources'][0].get('name', '')
 
     def __repr__(self):
         return self.value
 
+
 class Manufacturer:
     name = ''
     homepage_url = ''
 
     def __init__(self, manufacturerobj):
-        if manufacturerobj is None: return
+        if manufacturerobj is None:
+            return
         self.name = manufacturerobj.get('name', '')
         self.homepage_url = manufacturerobj.get('homepage_url', '')
 
@@ -57,15 +61,16 @@ class Manufacturer:
 
 
 class Seller:
-    name = ''
     display_flag = ''
     has_ecommerce = ''
     homepage_url = ''
     id = ''
+    name = ''
     uid = ''
 
     def __init__(self, sellerobj=None):
-        if sellerobj is None: return
+        if sellerobj is None:
+            return
         self.display_flag = sellerobj.get('display_flag', '')
         self.has_ecommerce = sellerobj.get('has_ecommerce', '')
         self.homepage_url = sellerobj.get('homepage_url', '')
@@ -74,7 +79,8 @@ class Seller:
         self.uid = sellerobj.get('uid', '')
 
     def __repr__(self):
-        return '{}: {}'.format(self.name, self.id)
+        return f'{self.name}: {self.id}'
+
 
 class PartOffer:
     eligible_region = ''
@@ -92,12 +98,13 @@ class PartOffer:
     order_multiple = ''
     packaging = ''
     product_url = ''
-    seller = ''
     sku = ''
     seller = Seller()
+    prices = []
 
     def __init__(self, offerobj):
-        if offerobj is None: return
+        if offerobj is None:
+            return
         self.in_stock_quantity = offerobj.get('in_stock_quantity', '')
         self.eligible_region = offerobj.get('eligible_region', '')
         self.factory_lead_days = offerobj.get('factory_lead_days', '')
@@ -116,9 +123,10 @@ class PartOffer:
         self.product_url = offerobj.get('product_url', '')
         self.sku = offerobj.get('sku', '')
         self.seller = Seller(offerobj.get('seller', None))
+        self.prices = offerobj.get('prices', [])
 
     def __repr__(self):
-        return '{}: {}'.format(self.seller.name, self.sku)
+        return f'{self.seller.name}: {self.sku}'
 
 
 class SpecValue:
@@ -129,15 +137,17 @@ class SpecValue:
     min_value = ''
 
     def __init__(self, specobj, name=''):
-        if specobj is None: return
+        if specobj is None:
+            return
         self.name = name
         self.display_value = specobj.get('display_value')
-        if specobj.get('value'): self.value = specobj.get('value')[0]
+        if specobj.get('value'):
+            self.value = specobj.get('value')[0]
         self.max_value = specobj.get('max_value')
         self.min_value = specobj.get('min_value')
 
     def __repr__(self):
-        return '{}: {}'.format(self.name, self.display_value)
+        return f'{self.name}: {self.display_value}'
 
     def __str__(self):
-        return '{}: {}'.format(self.name, self.display_value)
+        return self.__repr__
